@@ -4,13 +4,15 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+		<title>Async Javascript</title>
 
 		<script src="https://use.typekit.net/dkq5epu.js"></script>
 		<script>try{Typekit.load({ async: true });}catch(e){}</script>
 
 		<link rel="stylesheet" href="css/reveal.css">
 		<link rel="stylesheet" href="css/theme/kaliber5.css">
+		<link rel="stylesheet" href="css/spinner.css">
+		<link rel="stylesheet" href="css/custom.css">
 
 		<!-- Printing and PDF exports -->
 		<script>
@@ -25,46 +27,503 @@
 		<div class="reveal">
 			<div class="slides">
 				<section>
-					<h1>Headline</h1>
-					<h2>Subline</h2>
+					<h1>Async Javascript</h1>
+					<h2>Callbacks, Promises, Async/Await</h2>
+					<div id="floatingBarsG">
+						<div class="blockG" id="rotateG_01"></div>
+						<div class="blockG" id="rotateG_02"></div>
+						<div class="blockG" id="rotateG_03"></div>
+						<div class="blockG" id="rotateG_04"></div>
+						<div class="blockG" id="rotateG_05"></div>
+						<div class="blockG" id="rotateG_06"></div>
+						<div class="blockG" id="rotateG_07"></div>
+						<div class="blockG" id="rotateG_08"></div>
+					</div>
 				</section>
 				<section>
-
 					<div class="id-card">
-						<img src="https://pbs.twimg.com/profile_images/503937168855691265/SjLlgV06.jpeg" alt="">
-
 						<dl>
 							<dt>Name</dt>
-							<dd>Simon Ihmig</dd>
+							<dd>Andreas Schacht</dd>
 							<dt>Company</dt>
 							<dd><a href="http://www.kaliber5.de">kaliber5</a></dd>
 							<dt>Job title</dt>
-							<dd>Co-Founder, Web Developer, CTO</dd>
+							<dd>Web Developer</dd>
 							<dt>Email</dt>
-							<dd><a href="mailto:ihmig@kaliber5.de">ihmig@kaliber5.de</a></dd>
-							<dt>Twitter</dt>
-							<dd><a href="https://twitter.com/simonihmig">@simonihmig</a></dd>
-							<dt>Github</dt>
-							<dd><a href="https://github.com/simonihmig">@simonihmig</a></dd>
+							<dd><a href="mailto:schacht@kaliber5.de">schacht@kaliber5.de</a></dd>
 						</dl>
 					</div>
-
+					<aside class="notes">
+						Oh hey, these are some notes. They'll be hidden in your presentation, but you can see them if you open the
+						speaker notes window (hit 's' on your keyboard).
+					</aside>
 				</section>
 				<section data-markdown>
 					<script type="text/template">
-						## Real content comes here
+						## TOC
+						#### what will I talk about
+						- why async
+						- short intro into callbacks, promises, async
+						- by example
+						- stable
+						- generators
+						- observables
 
-						Some text
+						Note: Explain stable -> make your code stable with error handling
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Why Async
+						#### for the big picture
+						<!--<p class="fragment fade-left">single-threaded</p>-->
+						<p>single-threaded</p>
+						<p>non-blocking code</p>
+						<p>user experience</p>
+						<p>event loop</p>
+						<a href="https://www.youtube.com/watch?v=8aGhZQkoFbQ">Philip Roberts: What the
+							heck is the event loop
+							anyway? | JSConf EU 2014 </a>
+
+						Note: Dies ist eine Notizen
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						#### Sync
 
 						```js
-						test('just some dummy code example', function(assert) {
-							let names = ['foo', 'bar'],
-							call(names.map(function(name) {
-								return name.toUpperCase()
+						const fs = require('fs');
+						const html = require('./html');
+
+						function mdToHtml(file) {
+							let markdown = fs.readFileSync(file);
+							let htmlContent = html.fromMarkdownSync(markdown);
+							fs.writeFileSync(`${file}.html`, htmlContent);
+						}
+
+						mdToHtml('./README.md');
+						console.log('done');
+						```
+						Note:
+						- very common use case
+						- process depends on result of previous one
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						#### Sync
+
+						```js
+						const fs = require('fs');
+						const html = require('./html');
+
+						function mdToHtml(file) {
+							let markdown = fs.readFileSync(file);
+							let htmlContent = html.fromMarkdownSync(markdown);
+							fs.writeFileSync(`${file}.html`, htmlContent);
+						}
+
+						try {
+							mdToHtml('./README.md');
+							console.log('done');
+						} catch(err) {
+							console.error(err);
+						}
+						```
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						#### Callbacks
+
+						```js
+						const fs = require('fs');
+
+						fs.readFile('./README.md', (err, data) => {
+							// executes after data is available
+						});
+						```
+						- "error-first"- /"errorback"-convention
+						- err is null on success
+
+						Note:
+						- signature is just a convention
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Callbacks
+
+						```js
+						const fs = require('fs');
+
+						fs.readFile('./README.md', (err, data) => {
+							if (err) {
+								// handle error
+							} else {
+								// process data
+							}
+						});
+
+						```
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Callbacks
+
+						```js
+						const fs = require('fs');
+						const html = require('./html');
+
+						function mdToHtml(file, cb) {
+							fs.readFile(file, (err, markdown) => {
+								html.fromMarkdownCb(markdown, (err, htmlContent) => {
+									fs.writeFile(`${file}.html`, htmlContent, (err) => {
+										cb(null);
+									});
+								});
 							});
+						}
+
+						mdToHtml('./README.md', (err) => {
+							console.log('done');
+						});
+						```
+						Note:
+						- harder to read
+						- indentation
+						- not finished yet
+							- handle errors
+					</script>
+				</section>
+				<section data-markdown class="md-small">
+					<script type="text/template">
+						## Callbacks
+
+						```js
+						const fs = require('fs');
+						const html = require('./html');
+
+						function mdToHtml(file, cb) {
+							fs.readFile(file, (err, markdown) => {
+								if (err) {
+									cb(err);
+								} else {
+									html.fromMarkdownCb(markdown, (err, htmlContent) => {
+										if (err) {
+											cb(err);
+										} else {
+											fs.writeFile(`${file}.html`, htmlContent, (err) => {
+											    if (err) {
+											        cb(err);
+											    } else {
+											        cb(null);
+											    }
+											});
+										}
+									});
+								}
+							});
+						}
+
+						mdToHtml('./README.md', (err) => {
+							if (err) {
+								console.error(err);
+							} else {
+								console.log('done');
+							}
+						});
+						```
+						Note:
+						- very hard to read
+						- indentation, shallowed
+						- callback hell
+						- shape of pyramid
+						- known as pyramid of doom
+						- exit as soon as possible
+					</script>
+				</section>
+				<section data-markdown class="md-small">
+					<script type="text/template">
+						## Callbacks
+
+						```js
+						const fs = require('fs');
+						const html = require('./html');
+
+						function mdToHtml(file, cb) {
+							fs.readFile(file, (err, markdown) => {
+								if (err) {
+									return cb(err);
+								}
+								html.fromMarkdownCb(markdown, (err, htmlContent) => {
+									if (err) {
+										return cb(err);
+									}
+									fs.writeFile(`${file}.html`, htmlContent, (err) => {
+										if (err) {
+											return cb(err);
+										}
+										cb(null);
+									});
+								});
+							});
+						}
+
+						mdToHtml('./README.md', (err) => {
+							if (err) {
+								return console.error(err);
+							}
+							console.log('done');
+						});
+						```
+						Note:
+						- use named function
+							- stack trace
+					</script>
+				</section>
+				<section data-markdown class="md-small">
+					<script type="text/template">
+						## Callbacks
+
+						```js
+						const fs = require('fs');
+						const html = require('./html');
+
+						function mdToHtml(file, cb) {
+							fs.readFile(file, (err, markdown) => {
+								if (err) {
+									return cb(err);
+								}
+								htmlFromMd(markdown, file, cb);
+							});
+						}
+
+						function htmlFromMd(markdown, file, cb) {
+							html.fromMarkdownCb(markdown, (err, htmlContent) => {
+							if (err) {
+								return cb(err);
+							}
+							writeFile(htmlContent, file, cb);
+						}
+
+						function writeFile(htmlContent, file, cb) {
+							fs.writeFile(`${file}.html`, htmlContent, (err) => {
+								if (err) {
+									return cb(err);
+								}
+								cb(null);
+							});
+						}
+
+						mdToHtml('./README.md', (err) => {
+							if (err) {
+								return console.error(err);
+							}
+							console.log('done');
+						});
+						```
+						Note:
+						- better indentation
+						- more shallowed
+						- advantage
+						  - first approach
+							- can consume less memory
+							- can faster
+						- drawback, disadvantage
+							- no chaining
+							- nested level
+						- compare
+							- not really intuitive like first
+							- far away from first example
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						#### Sync
+
+						```js
+						const fs = require('fs');
+						const html = require('./html');
+
+						function mdToHtml(file) {
+							let markdown = fs.readFileSync(file);
+							let htmlContent = html.fromMarkdownSync(markdown);
+							fs.writeFileSync(`${file}.html`, htmlContent);
+						}
+
+						try {
+							mdToHtml('./README.md');
+							console.log('done');
+						} catch(err) {
+							console.error(err);
+						}
+						```
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Promises
+						- objects represents an eventual result
+						- primary interacting through its `then` method
+						- can be in states
+							- pending
+							- fullfilled
+							- rejected
+							- settled = fullfilled || rejected
+
+						Note:
+							- go more in detail later
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						#### Promises
+
+						```js
+						let promise = new Promise((resolve, reject) => {
+							// do something async
+							// on success
+							resolve(value);
+							// on failure
+							reject(reason);
+						});
+
+						promise.then((value) => {
+							// on fulfillment
+						}, (reason) => {
+							// on rejection
 						});
 						```
 
+						Note:
+						- takes 2 arguments: success/failure (fulfill/reject)
+						- then returns a promise
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Promises
+						#### wrap callback style
+
+						```js
+						const fs = require('fs');
+
+						fs.readFile('./README.md', (err, data) => {
+							if (err) {
+								// handle error
+							} else {
+								// process data
+							}
+						});
+
+						```
+						Note:
+						- from previous explanation
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Promises
+						#### wrap callback style
+
+						```js
+						const fs = require('fs');
+
+						let promise = new Promise((resolve, reject) => {
+							fs.readFile('./README.md', (err, data) => {
+								if (err) {
+									return reject(err);
+								}
+								resolve(data);
+							});
+						});
+
+						promise.then((data) => {
+							// will be called, if promise resolves
+						}, (err) => {
+							// will be called, when promise rejects
+						});
+
+						```
+						Note:
+						- the magic is in the then method
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Promises
+						#### chainable
+
+						```js
+						promise.then((data) => {
+							return new Promise(...);
+						}).then((data) => {
+							return 42;
+						}).then((data) => {
+							throw new Error('message');
+						}).then((data) => {
+							// this will never been reached
+						}).then(undefined, (error) => {
+							// handle error;
+						});
+
+						```
+						Note:
+						- the magic is in the then method
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Promises
+						#### chainable
+
+						```js
+						promise.then((data) => {
+							return new Promise(...);
+						}).then((data) => {
+							return 42;
+						}).then((data) => {
+							throw new Error('message');
+						}).then((data) => {
+							// this will never been reached
+						}).catch((error) => {
+							// handle error;
+						});
+
+						```
+						Note:
+						- the magic is in the then method
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						#### Promises
+
+						```js
+						const fsp = require('fs-promise');
+						const html = require('./html');
+
+						function mdToHtml(file) {
+							return fsp.readFileSync(file)
+							.then((markdown) => {
+								return html.fromMarkdownProm(markdown);
+							}).then((htmlContent) => {
+								return fsp.writeFile(`${file}.html`, htmlContent);
+							});
+						}
+
+						mdToHtml('./README.md').then(() => {
+							console.log('done');
+						}, (error) => {
+							console.error(error);
+						});
+
+						```
+						Note:
+						- the magic is in the then method
 					</script>
 				</section>
 				<section>
@@ -80,6 +539,8 @@
 			// More info https://github.com/hakimel/reveal.js#configuration
 			Reveal.initialize({
 				history: true,
+        transition: 'default',
+        progress: false,
 
 				// More info https://github.com/hakimel/reveal.js#dependencies
 				dependencies: [
