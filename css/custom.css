@@ -2,3 +2,12 @@
     font-size: 14px;
     line-height: 15px;
 }
+
+.md-very-small pre code {
+    font-size: 10px;
+    line-height: 11px;
+}
+
+.reveal .md-code-large pre code {
+    max-height: 700px;
+}

@@ -29,15 +29,15 @@
 				<section>
 					<h1>Async Javascript</h1>
 					<h2>Callbacks, Promises, Async/Await</h2>
-					<div id="floatingBarsG">
-						<div class="blockG" id="rotateG_01"></div>
-						<div class="blockG" id="rotateG_02"></div>
-						<div class="blockG" id="rotateG_03"></div>
-						<div class="blockG" id="rotateG_04"></div>
-						<div class="blockG" id="rotateG_05"></div>
-						<div class="blockG" id="rotateG_06"></div>
-						<div class="blockG" id="rotateG_07"></div>
-						<div class="blockG" id="rotateG_08"></div>
+					<div class="floatingBarsG">
+						<div class="blockG rotateG_01"></div>
+						<div class="blockG rotateG_02"></div>
+						<div class="blockG rotateG_03"></div>
+						<div class="blockG rotateG_04"></div>
+						<div class="blockG rotateG_05"></div>
+						<div class="blockG rotateG_06"></div>
+						<div class="blockG rotateG_07"></div>
+						<div class="blockG rotateG_08"></div>
 					</div>
 				</section>
 				<section>
@@ -61,31 +61,12 @@
 				<section data-markdown>
 					<script type="text/template">
 						## TOC
-						#### what will I talk about
-						- why async
-						- short intro into callbacks, promises, async
-						- by example
-						- stable
-						- generators
-						- observables
-
-						Note: Explain stable -> make your code stable with error handling
-					</script>
-				</section>
-				<section data-markdown>
-					<script type="text/template">
-						## Why Async
-						#### for the big picture
-						<!--<p class="fragment fade-left">single-threaded</p>-->
-						<p>single-threaded</p>
-						<p>non-blocking code</p>
-						<p>user experience</p>
-						<p>event loop</p>
-						<a href="https://www.youtube.com/watch?v=8aGhZQkoFbQ">Philip Roberts: What the
-							heck is the event loop
-							anyway? | JSConf EU 2014 </a>
-
-						Note: Dies ist eine Notizen
+						what will I talk about
+						- sync example
+						- callback example
+						- promise example
+						- async/await example
+						- async with generators
 					</script>
 				</section>
 				<section data-markdown>
@@ -105,6 +86,7 @@
 						mdToHtml('./README.md');
 						console.log('done');
 						```
+						Add error handling
 						Note:
 						- very common use case
 						- process depends on result of previous one
@@ -133,6 +115,18 @@
 						```
 					</script>
 				</section>
+				<section>
+					<div class="floatingBarsG">
+						<div class="blockG rotateG_01"></div>
+						<div class="blockG rotateG_02"></div>
+						<div class="blockG rotateG_03"></div>
+						<div class="blockG rotateG_04"></div>
+						<div class="blockG rotateG_05"></div>
+						<div class="blockG rotateG_06"></div>
+						<div class="blockG rotateG_07"></div>
+						<div class="blockG rotateG_08"></div>
+					</div>
+				</section>
 				<section data-markdown>
 					<script type="text/template">
 						#### Callbacks
@@ -144,7 +138,7 @@
 							// executes after data is available
 						});
 						```
-						- "error-first"- /"errorback"-convention
+						- "error-first"- / "errback"-convention
 						- err is null on success
 
 						Note:
@@ -167,11 +161,34 @@
 						});
 
 						```
+						Note:
+						- construct will look like this
 					</script>
 				</section>
 				<section data-markdown>
 					<script type="text/template">
 						## Callbacks
+
+						```js
+						const fs = require('fs');
+
+						try {
+							fs.readFile('./README.md', (err, data) => {
+								if (err) {
+									throw err;
+								}
+								console.log('done');
+							});
+						} catch(err) {
+							console.error(err);
+						}
+						```
+						- try / catch won't work
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						#### Callbacks
 
 						```js
 						const fs = require('fs');
@@ -191,16 +208,18 @@
 							console.log('done');
 						});
 						```
+						- error handling
 						Note:
 						- harder to read
 						- indentation
+						- nested level 3
 						- not finished yet
 							- handle errors
 					</script>
 				</section>
-				<section data-markdown class="md-small">
+				<section data-markdown class="md-small md-code-large">
 					<script type="text/template">
-						## Callbacks
+						#### Callbacks
 
 						```js
 						const fs = require('fs');
@@ -245,9 +264,9 @@
 						- exit as soon as possible
 					</script>
 				</section>
-				<section data-markdown class="md-small">
+				<section data-markdown class="md-small md-code-large">
 					<script type="text/template">
-						## Callbacks
+						#### Callbacks
 
 						```js
 						const fs = require('fs');
@@ -279,12 +298,15 @@
 							console.log('done');
 						});
 						```
+						- exit as soon as possible
 						Note:
+						- skip else block
+						- skip further execution
 						- use named function
 							- stack trace
 					</script>
 				</section>
-				<section data-markdown class="md-small">
+				<section data-markdown class="md-small md-code-large">
 					<script type="text/template">
 						## Callbacks
 
@@ -361,6 +383,8 @@
 							console.error(err);
 						}
 						```
+						Note:
+						- compare
 					</script>
 				</section>
 				<section data-markdown>
@@ -368,14 +392,14 @@
 						## Promises
 						- objects represents an eventual result
 						- primary interacting through its `then` method
-						- can be in states
+						- states
 							- pending
 							- fullfilled
 							- rejected
 							- settled = fullfilled || rejected
 
 						Note:
-							- go more in detail later
+							- go more in detail later?
 					</script>
 				</section>
 				<section data-markdown>
@@ -384,7 +408,7 @@
 
 						```js
 						let promise = new Promise((resolve, reject) => {
-							// do something async
+							// do something
 							// on success
 							resolve(value);
 							// on failure
@@ -399,57 +423,10 @@
 						```
 
 						Note:
-						- takes 2 arguments: success/failure (fulfill/reject)
+						- constructor takes a callback
+						- passed 2 functions into the callback
+						- takes 2 arguments: onFulfill/onReject(fulfill/reject)
 						- then returns a promise
-					</script>
-				</section>
-				<section data-markdown>
-					<script type="text/template">
-						## Promises
-						#### wrap callback style
-
-						```js
-						const fs = require('fs');
-
-						fs.readFile('./README.md', (err, data) => {
-							if (err) {
-								// handle error
-							} else {
-								// process data
-							}
-						});
-
-						```
-						Note:
-						- from previous explanation
-					</script>
-				</section>
-				<section data-markdown>
-					<script type="text/template">
-						## Promises
-						#### wrap callback style
-
-						```js
-						const fs = require('fs');
-
-						let promise = new Promise((resolve, reject) => {
-							fs.readFile('./README.md', (err, data) => {
-								if (err) {
-									return reject(err);
-								}
-								resolve(data);
-							});
-						});
-
-						promise.then((data) => {
-							// will be called, if promise resolves
-						}, (err) => {
-							// will be called, when promise rejects
-						});
-
-						```
-						Note:
-						- the magic is in the then method
 					</script>
 				</section>
 				<section data-markdown>
@@ -472,7 +449,9 @@
 
 						```
 						Note:
-						- the magic is in the then method
+						- return promisses
+						- return concrete values
+						- throw error
 					</script>
 				</section>
 				<section data-markdown>
@@ -500,6 +479,114 @@
 				</section>
 				<section data-markdown>
 					<script type="text/template">
+						## Promises
+						...swallow errors.
+
+						Do they really?
+
+						```js
+						let promise = promise.then((data) => {
+							throw new Error('message');
+						});
+						// ...some more code
+
+						```
+						...what happens now?
+						Note:
+						- not popped up, immediatly
+						- promise is in rejected state
+						- there are 2 options
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Promises
+						You can chain the catch later
+
+						```js
+						let promise = promise.then((data) => {
+							throw new Error('message');
+						});
+						//
+						// ...in another (maybe async) part of code
+						//
+						promise.catch((error) => {
+							console.error(error);
+						});
+						```
+						Note:
+							- As long as the promise live
+							- accessable
+							- add something to the chain
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Promises
+						don't really swallow errors...
+
+						```js
+						let promise = promise.then((data) => {
+							throw new Error('message');
+						});
+						//
+						// ...promise is settled and not referenced anymore...
+						// ...the error will popup on garbage-collection
+						```
+						Note:
+							- hard to say when
+							- don't forget to catch
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Promises
+						#### wrap callback style
+
+						```js
+						const fs = require('fs');
+
+						fs.readFile('./README.md', (err, data) => {
+							if (err) {
+								// handle error
+							} else {
+								// process data
+							}
+						});
+
+						```
+						Note:
+						- from previous explaination
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Promises
+						#### wrap callback style
+
+						```js
+						const fs = require('fs');
+
+						let promise = new Promise((resolve, reject) => {
+							fs.readFile('./README.md', (err, data) => {
+								if (err) {
+									return reject(err);
+								}
+								resolve(data);
+							});
+						});
+
+						promise.then((data) => {
+							// will be called, if promise resolves
+						}).catch((err) => {
+							// will be called, when promise rejects
+						});
+
+						```
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
 						#### Promises
 
 						```js
@@ -507,7 +594,7 @@
 						const html = require('./html');
 
 						function mdToHtml(file) {
-							return fsp.readFileSync(file)
+							return fsp.readFile(file)
 							.then((markdown) => {
 								return html.fromMarkdownProm(markdown);
 							}).then((htmlContent) => {
@@ -517,13 +604,436 @@
 
 						mdToHtml('./README.md').then(() => {
 							console.log('done');
-						}, (error) => {
+						}).catch((error) => {
 							console.error(error);
 						});
 
 						```
 						Note:
-						- the magic is in the then method
+						- fs ops also available as promises
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						#### Promises
+
+						```js
+						const fsp = require('fs-promise');
+						const html = require('./html');
+
+						function mdToHtml(file) {
+							return fsp.readFile(file)
+							.then(html.fromMarkdownProm)
+							.then((htmlContent) => {
+								return fsp.writeFile(`${file}.html`, htmlContent);
+							});
+						}
+
+						mdToHtml('./README.md').then(() => {
+							console.log('done');
+						}).catch((error) => {
+							console.error(error);
+						});
+
+						```
+						Note:
+						- a little bit shorter
+						- comparison
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						#### Sync
+
+						```js
+						const fs = require('fs');
+						const html = require('./html');
+
+						function mdToHtml(file) {
+							let markdown = fs.readFileSync(file);
+							let htmlContent = html.fromMarkdownSync(markdown);
+							fs.writeFileSync(`${file}.html`, htmlContent);
+						}
+
+						try {
+							mdToHtml('./README.md');
+							console.log('done');
+						} catch(err) {
+							console.error(err);
+						}
+						```
+						Note:
+							- good, but not satisfied
+							- have another bullet
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						#### async / await
+						- RC ES7
+						- `async function`
+							- will return a Promise
+						- `await` keyword
+							- suspending execution in context
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						#### async / await
+						```js
+						const fsp = require('fs-promise');
+
+						async function(file) {
+							let markdown = await fsp.readFile(file);
+							...
+						}
+						```
+						Note:
+						- what happens
+							- onFulfill: assign markdown with the resolved value
+							- onRejection: throw an error
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						#### async / await
+						```js
+						const fsp = require('fs-promise');
+
+						async function(file) {
+							try {
+								let markdown = await fsp.readFile(file);
+								let somevalue = await (() => { return 42; })();
+								// do something
+								return markdown;
+							} catch(error) {
+								// handle error
+								// return fallbackValue;
+								// 	or
+								// throw error;
+							}
+						...
+						}
+						```
+						Note:
+						- try / catch like in sync context
+						- Now see our Example
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						#### async / await
+
+						```js
+						const fsp = require('fs-promise');
+						const html = require('./html');
+
+						async function mdToHtml(file) {
+							let markdown = await fsp.readFile(file);
+							let htmlContent = await html.fromMarkdownProm(markdown);
+							await fsp.writeFile(`${file}.html`, htmlContent);
+						}
+
+						mdToHtml('./README.md').then(() => {
+							console.log('done');
+						}).catch((error) => {
+							console.error(error);
+						});
+						```
+						Note:
+						- compare to sync
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						#### Sync
+
+						```js
+						const fs = require('fs');
+						const html = require('./html');
+
+						function mdToHtml(file) {
+							let markdown = fs.readFileSync(file);
+							let htmlContent = html.fromMarkdownSync(markdown);
+							fs.writeFileSync(`${file}.html`, htmlContent);
+						}
+
+						try {
+							mdToHtml('./README.md');
+							console.log('done');
+						} catch(err) {
+							console.error(err);
+						}
+						```
+						Note:
+						- almost the same
+					</script>
+				</section>
+				<section data-markdown class="md-code-large">
+					<script type="text/template">
+						#### async / await
+						parallel execution
+						```js
+
+						async function () {
+							let promA = new Promise(...);
+							let promB = new Promise(...);
+
+							return await promA + await promB;
+						}
+
+						async function () {
+							let [resultA, resultB] = await Promise.all([
+								new Promise(...),
+								new Promise(...)
+							]);
+
+							return resultA + resultBB;
+						}
+						```
+					</script>
+				</section>
+				<section data-markdown class="md-code-large">
+					<script type="text/template">
+						#### generator
+						- pass argument to generator function
+						- generator object saves it's state while suspending
+
+						```js
+
+						function* generatorFunction(startval) {
+							let current = startval;
+							while(current > 0) {
+								yield current;
+								current--;
+							}
+						}
+
+						let generatorObject = generatorFunction(3);
+
+						console.log(generatorObject.next());
+
+						for (let number of generatorObject ) {
+							console.log(number);
+						}
+
+						console.log(generatorObject.next());
+						// { done: false, value: 3}, 2,  1, { done: true }
+						```
+						Note:
+							- iterable: g[Symbol.iterator] === function
+							- iterable: g[Symbol.iterator]: () => ({ next() { return { done: true, value: 1 }})
+							- iterable: @@iterator
+							- iterator: g.next === function
+							- suspend / resume
+					</script>
+				</section>
+				<section data-markdown class="md-code-large">
+					<script type="text/template">
+						#### generator
+						- pass value to yield
+
+						```js
+						function* generatorFunction(startval) {
+							let current = startval;
+							while(current > 0) {
+								let restart = yield current;
+								if (restart) {
+									current = startval;
+								else {
+									current--;
+								}
+							}
+						}
+
+						let generatorObject = generatorFunction(3);
+
+						//will throw an error
+						//console.log(generatorObject.next(true));
+
+						console.log(generatorObject.next().value);
+						console.log(generatorObject.next(true).value);
+						console.log(generatorObject.next().value);
+						// 3, 2, 3
+						```
+						Note:
+						- iterable: g[Symbol.iterator] === function
+						- iterable: g[Symbol.iterator]: () => ({ next() { return { done: true, value: 1 }})
+						- iterable: @@iterator
+						- iterator: g.next === function
+					</script>
+				</section>
+				<section data-markdown class="md-code-large">
+					<script type="text/template">
+						#### generator
+						- IoC
+
+						```js
+						function* generatorFunction() {
+							yield false;
+							yield true;
+							yield false;
+						}
+
+						let generatorObject = generatorFunction();
+						let startval = 3;
+						let currentval = startval;
+						while(true) {
+							let reset = generatorObject.next();
+							console.log(currentval);
+							if (reset.value) {
+								currentval = startval;
+							} else {
+								currentval--;
+							}
+							if (reset.done || currentval < 1) {
+								break;
+							}
+						}
+						// will output 3, 2, 3
+						```
+						Note:
+						- iterable: g[Symbol.iterator] === function
+						- iterable: g[Symbol.iterator]: () => ({ next() { return { done: true, value: 1 }})
+						- iterable: @@iterator
+						- iterator: g.next === function
+					</script>
+				</section>
+				<section data-markdown class="md-code-large">
+					<script type="text/template">
+						#### generator
+						- IoC
+
+						```js
+						function* generatorFunction() {
+							yield false;
+							yield true;
+							yield false;
+						}
+
+						function printCount(genFunc, startval) {
+							let generatorObject = genFunc();
+							let currentval = startval;
+							while(true) {
+								let reset = generatorObject.next();
+								console.log(currentval);
+								if (reset.value) {
+									currentval = startval;
+								} else {
+									currentval--;
+								}
+								if (reset.done || currentval < 1) {
+									break;
+								}
+							}
+						}
+
+						printCount(generatorFunction, 3);
+						//  3, 2 3
+
+						```
+					</script>
+				</section>
+				<section data-markdown class="md-code-large">
+					<script type="text/template">
+						#### generator
+						- IoC
+
+						```js
+						function* logMessages() {
+							yield 'Message 1';
+							yield 'Message 2';
+							yield 'Message 3';
+						}
+
+						function remoteLogger(genFunc) {
+							let generatorObject = genFunc();
+							getNext();
+
+							function getNext() {
+								let message = generatorObject.next();
+								if (message.done) {
+									return;
+								}
+								remoteLog(message.value, getNext);
+							},
+
+							function remoteLog(value, next) {
+								ajax.post('https://my-remote-log.com', { value })
+								.then(() => {
+									next();
+								});
+							}
+						}
+						remoteLogger(logMessages);
+						```
+					</script>
+				</section>
+				<section data-markdown class="md-code-large">
+					<script type="text/template">
+						#### generator
+
+						```js
+						function remoteLogger(genFunc) {
+							let generatorObject = genFunc();
+							getNext();
+
+							function getNext() {
+								let message = generatorObject.next();
+								if (message.done) {
+									return;
+								}
+								remoteLog(message.value, getNext);
+							},
+							function remoteLog(value, next) {
+								ajax.post('https://my-remote-log.com', { value })
+								.then(() => {
+									next();
+								});
+							}
+						}
+						remoteLogger(function* logMessages() {
+							yield 'Message 1';
+							yield 'Message 2';
+							yield 'Message 3';
+						});
+						```
+					</script>
+				</section>
+				<section data-markdown class="md-code-large">
+					<script type="text/template">
+						#### generator
+
+						```js
+						function remoteLogger(genFunc) {
+							let generatorObject = genFunc();
+							getNext();
+							function getNext() {
+								let message = generatorObject.next();
+								if (message.done) {
+									return;
+								}
+								remoteLog(message.value, getNext);
+							},
+							function remoteLog(value, next) {
+								ajax.post('https://my-remote-log.com', { value })
+								.then(() => {
+									next();
+								}, (err) => {
+									generatorObject.throw(error);
+								});
+							}
+						}
+						remoteLogger(function* logMessages() {
+							try {
+								yield 'Message 1';
+								yield 'Message 2';
+								yield 'Message 3';
+							} catch(err) {
+								console.error(err);
+							}
+						});
+						```
 					</script>
 				</section>
 				<section>
@@ -541,6 +1051,7 @@
 				history: true,
         transition: 'default',
         progress: false,
+        slideNumber: true,
 
 				// More info https://github.com/hakimel/reveal.js#dependencies
 				dependencies: [
