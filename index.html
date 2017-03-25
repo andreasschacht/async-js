@@ -67,6 +67,8 @@
 						- promise example
 						- async/await example
 						- async with generators
+						Note:
+						- example covers a common use case
 					</script>
 				</section>
 				<section data-markdown>
@@ -83,13 +85,18 @@
 							fs.writeFileSync(`${file}.html`, htmlContent);
 						}
 
+
 						mdToHtml('./README.md');
 						console.log('done');
 						```
-						Add error handling
+						<p class="fragment fade-left">Missing error handling</p>
 						Note:
 						- very common use case
-						- process depends on result of previous one
+						- next process depends on result of previous one
+						- replace operations by any other
+						- advantage
+							- good readability
+							- easy to see, what happens
 					</script>
 				</section>
 				<section data-markdown>
@@ -113,6 +120,13 @@
 							console.error(err);
 						}
 						```
+						Note:
+						- surround function call
+						- advantage
+							- try/catch works well in sync context
+						- disadvantage
+							- blocking code
+							- time consuming processes
 					</script>
 				</section>
 				<section>
@@ -126,6 +140,11 @@
 						<div class="blockG rotateG_07"></div>
 						<div class="blockG rotateG_08"></div>
 					</div>
+					<aside class="notes">
+						result<br/>
+						you know what i mean
+					</aside>
+
 				</section>
 				<section data-markdown>
 					<script type="text/template">
@@ -138,10 +157,12 @@
 							// executes after data is available
 						});
 						```
-						- "error-first"- / "errback"-convention
-						- err is null on success
-
+						<p class="fragment fade-left">"error-first"- / "errback"-convention</p>
+						<p class="fragment fade-left">err is null on success</p>
 						Note:
+						- pass a function, that receives 2 arguments
+						- common convention in node
+						- well known
 						- signature is just a convention
 					</script>
 				</section>
@@ -162,7 +183,7 @@
 
 						```
 						Note:
-						- construct will look like this
+						- endup to a construct like this
 					</script>
 				</section>
 				<section data-markdown>
@@ -183,13 +204,14 @@
 							console.error(err);
 						}
 						```
-						- try / catch won't work
+						<p class="fragment fade-left">try / catch won't work</p>
+						<p class="fragment fade-left">already leave the try block</p>
 					</script>
 				</section>
 				<section data-markdown>
 					<script type="text/template">
 						#### Callbacks
-
+						Welcome to...
 						```js
 						const fs = require('fs');
 						const html = require('./html');
@@ -208,8 +230,12 @@
 							console.log('done');
 						});
 						```
-						- error handling
+						<p class="fragment fade-left">...callback hell</p>
 						Note:
+						- phrase: callback hell
+						- phrase: pyramid of doom
+						- shape of pyramid
+						- guess, what it means
 						- harder to read
 						- indentation
 						- nested level 3
@@ -220,7 +246,6 @@
 				<section data-markdown class="md-small md-code-large">
 					<script type="text/template">
 						#### Callbacks
-
 						```js
 						const fs = require('fs');
 						const html = require('./html');
@@ -255,13 +280,14 @@
 							}
 						});
 						```
+						<p class="fragment fade-left">exit as soon as possible</p>
 						Note:
-						- very hard to read
-						- indentation, shallowed
-						- callback hell
+						- phrase: callback hell
 						- shape of pyramid
 						- known as pyramid of doom
-						- exit as soon as possible
+						- very hard to read
+						- reduce indentation, be more shallowed
+							- exit as soon as possible
 					</script>
 				</section>
 				<section data-markdown class="md-small md-code-large">
@@ -298,12 +324,14 @@
 							console.log('done');
 						});
 						```
-						- exit as soon as possible
+						<p class="fragment fade-left">use named functions</p>
 						Note:
 						- skip else block
-						- skip further execution
-						- use named function
-							- stack trace
+						- skip further execution by return statement
+						- what we can do
+							- use named function
+								- error pop up
+								- stack trace
 					</script>
 				</section>
 				<section data-markdown class="md-small md-code-large">
@@ -350,16 +378,13 @@
 						Note:
 						- better indentation
 						- more shallowed
-						- advantage
-						  - first approach
-							- can consume less memory
-							- can faster
 						- drawback, disadvantage
-							- no chaining
-							- nested level
+							- nested level is still the same
+							- missing chaining
 						- compare
-							- not really intuitive like first
 							- far away from first example
+							- not really intuitive like the first one
+						- comparision to sync
 					</script>
 				</section>
 				<section data-markdown>
@@ -384,7 +409,8 @@
 						}
 						```
 						Note:
-						- compare
+						- Advantage of callback
+							- its async
 					</script>
 				</section>
 				<section data-markdown>
@@ -399,7 +425,7 @@
 							- settled = fullfilled || rejected
 
 						Note:
-							- go more in detail later?
+							- also well known
 					</script>
 				</section>
 				<section data-markdown>
@@ -408,7 +434,7 @@
 
 						```js
 						let promise = new Promise((resolve, reject) => {
-							// do something
+							// do something time consuming
 							// on success
 							resolve(value);
 							// on failure
@@ -425,7 +451,7 @@
 						Note:
 						- constructor takes a callback
 						- passed 2 functions into the callback
-						- takes 2 arguments: onFulfill/onReject(fulfill/reject)
+						- then takes 2 arguments: onFulfill/onReject(fulfill/reject)
 						- then returns a promise
 					</script>
 				</section>
@@ -449,9 +475,10 @@
 
 						```
 						Note:
-						- return promisses
-						- return concrete values
+						- return promises
+						- return values
 						- throw error
+						- see last then
 					</script>
 				</section>
 				<section data-markdown>
@@ -474,7 +501,9 @@
 
 						```
 						Note:
-						- the magic is in the then method
+						- catch method
+						- familar with proms
+						- point out one thing
 					</script>
 				</section>
 				<section data-markdown>
@@ -515,9 +544,9 @@
 						});
 						```
 						Note:
-							- As long as the promise live
-							- accessable
-							- add something to the chain
+						- As long as the promise live
+						- and is accessable / has a reference
+						- add something to the chain
 					</script>
 				</section>
 				<section data-markdown>
@@ -553,9 +582,9 @@
 								// process data
 							}
 						});
-
 						```
 						Note:
+						- callback style is still common
 						- from previous explaination
 					</script>
 				</section>
@@ -581,8 +610,9 @@
 						}).catch((err) => {
 							// will be called, when promise rejects
 						});
-
 						```
+						Note:
+						- back to example
 					</script>
 				</section>
 				<section data-markdown>
@@ -610,6 +640,8 @@
 
 						```
 						Note:
+						- see the chance
+						- a little bit shorter
 						- fs ops also available as promises
 					</script>
 				</section>
@@ -637,7 +669,7 @@
 
 						```
 						Note:
-						- a little bit shorter
+						- close to the sync one
 						- comparison
 					</script>
 				</section>
@@ -716,7 +748,9 @@
 						}
 						```
 						Note:
+						- await suspend executions
 						- try / catch like in sync context
+						- can return values
 						- Now see our Example
 					</script>
 				</section>
@@ -788,7 +822,7 @@
 								new Promise(...)
 							]);
 
-							return resultA + resultBB;
+							return resultA + resultB;
 						}
 						```
 					</script>
@@ -796,244 +830,111 @@
 				<section data-markdown class="md-code-large">
 					<script type="text/template">
 						#### generator
-						- pass argument to generator function
 						- generator object saves it's state while suspending
 
 						```js
-
-						function* generatorFunction(startval) {
-							let current = startval;
-							while(current > 0) {
-								yield current;
-								current--;
+						function* fibonacci() {
+							let fn1 = 1;
+							let fn2 = 1;
+							while (1){
+								let current = fn2;
+								fn2 = fn1;
+								fn1 = fn1 + current;
+								let reset = yield current;
+								if (reset){
+									fn1 = 1;
+									fn2 = 1;
+								}
 							}
 						}
 
-						let generatorObject = generatorFunction(3);
+						let sequence = fibonacci();
+						console.log(sequence.next());     // { done: false, value: 1}
+						console.log(sequence.next().value);     // 1
+						console.log(sequence.next().value);     // 2
+						console.log(sequence.next(true).value); // 1
+						```
+						Note:
+						- generator function
+						- generator object
+						- pass arg to next
+						- suspend / resume
+						- iterable: g[Symbol.iterator] === function
+						- iterable: g[Symbol.iterator]: () => ({ next() { return { done: true, value: 1 }})
+						- iterable: @@iterator
+						- iterator: g.next === function
+					</script>
+				</section>
+				<section data-markdown class="md-code-large">
+					<script type="text/template">
+						#### generator
+						```js
 
-						console.log(generatorObject.next());
-
-						for (let number of generatorObject ) {
-							console.log(number);
+						function* generatorFunction() {
+							let current = '';
+							current = yield current;
+							console.log(current);
+							// ...
+							current = yield current;
+							console.log(current);
+							// ...
+							current = yield current;
+							console.log(current);
 						}
-
-						console.log(generatorObject.next());
-						// { done: false, value: 3}, 2,  1, { done: true }
 						```
 						Note:
 							- iterable: g[Symbol.iterator] === function
 							- iterable: g[Symbol.iterator]: () => ({ next() { return { done: true, value: 1 }})
 							- iterable: @@iterator
 							- iterator: g.next === function
-							- suspend / resume
+							- suspend / resume, already heared
+							-
 					</script>
 				</section>
 				<section data-markdown class="md-code-large">
 					<script type="text/template">
 						#### generator
-						- pass value to yield
-
 						```js
-						function* generatorFunction(startval) {
-							let current = startval;
-							while(current > 0) {
-								let restart = yield current;
-								if (restart) {
-									current = startval;
-								else {
-									current--;
-								}
-							}
-						}
-
-						let generatorObject = generatorFunction(3);
-
-						//will throw an error
-						//console.log(generatorObject.next(true));
-
-						console.log(generatorObject.next().value);
-						console.log(generatorObject.next(true).value);
-						console.log(generatorObject.next().value);
-						// 3, 2, 3
-						```
-						Note:
-						- iterable: g[Symbol.iterator] === function
-						- iterable: g[Symbol.iterator]: () => ({ next() { return { done: true, value: 1 }})
-						- iterable: @@iterator
-						- iterator: g.next === function
-					</script>
-				</section>
-				<section data-markdown class="md-code-large">
-					<script type="text/template">
-						#### generator
-						- IoC
-
-						```js
-						function* generatorFunction() {
-							yield false;
-							yield true;
-							yield false;
-						}
-
-						let generatorObject = generatorFunction();
-						let startval = 3;
-						let currentval = startval;
-						while(true) {
-							let reset = generatorObject.next();
-							console.log(currentval);
-							if (reset.value) {
-								currentval = startval;
-							} else {
-								currentval--;
-							}
-							if (reset.done || currentval < 1) {
-								break;
-							}
-						}
-						// will output 3, 2, 3
-						```
-						Note:
-						- iterable: g[Symbol.iterator] === function
-						- iterable: g[Symbol.iterator]: () => ({ next() { return { done: true, value: 1 }})
-						- iterable: @@iterator
-						- iterator: g.next === function
-					</script>
-				</section>
-				<section data-markdown class="md-code-large">
-					<script type="text/template">
-						#### generator
-						- IoC
-
-						```js
-						function* generatorFunction() {
-							yield false;
-							yield true;
-							yield false;
-						}
-
-						function printCount(genFunc, startval) {
-							let generatorObject = genFunc();
-							let currentval = startval;
-							while(true) {
-								let reset = generatorObject.next();
-								console.log(currentval);
-								if (reset.value) {
-									currentval = startval;
-								} else {
-									currentval--;
-								}
-								if (reset.done || currentval < 1) {
-									break;
-								}
-							}
-						}
-
-						printCount(generatorFunction, 3);
-						//  3, 2 3
-
-						```
-					</script>
-				</section>
-				<section data-markdown class="md-code-large">
-					<script type="text/template">
-						#### generator
-						- IoC
-
-						```js
-						function* logMessages() {
-							yield 'Message 1';
-							yield 'Message 2';
-							yield 'Message 3';
-						}
-
-						function remoteLogger(genFunc) {
+						function remote(genFunc) {
 							let generatorObject = genFunc();
 							getNext();
-
-							function getNext() {
-								let message = generatorObject.next();
-								if (message.done) {
-									return;
-								}
-								remoteLog(message.value, getNext);
-							},
-
-							function remoteLog(value, next) {
-								ajax.post('https://my-remote-log.com', { value })
-								.then(() => {
-									next();
-								});
-							}
-						}
-						remoteLogger(logMessages);
-						```
-					</script>
-				</section>
-				<section data-markdown class="md-code-large">
-					<script type="text/template">
-						#### generator
-
-						```js
-						function remoteLogger(genFunc) {
-							let generatorObject = genFunc();
-							getNext();
-
-							function getNext() {
-								let message = generatorObject.next();
-								if (message.done) {
-									return;
-								}
+							function getNext(answer) {
+								let message = generatorObject.next(answer);
+								if (message.done) { return; }
 								remoteLog(message.value, getNext);
 							},
 							function remoteLog(value, next) {
-								ajax.post('https://my-remote-log.com', { value })
-								.then(() => {
-									next();
-								});
+								ajax.post('https://my-remote.com', { value })
+								.then((answer) => { next(answer);})
+								.catch((err) => { generatorObject.throw(err); });
 							}
 						}
-						remoteLogger(function* logMessages() {
-							yield 'Message 1';
-							yield 'Message 2';
-							yield 'Message 3';
-						});
-						```
-					</script>
-				</section>
-				<section data-markdown class="md-code-large">
-					<script type="text/template">
-						#### generator
-
-						```js
-						function remoteLogger(genFunc) {
-							let generatorObject = genFunc();
-							getNext();
-							function getNext() {
-								let message = generatorObject.next();
-								if (message.done) {
-									return;
-								}
-								remoteLog(message.value, getNext);
-							},
-							function remoteLog(value, next) {
-								ajax.post('https://my-remote-log.com', { value })
-								.then(() => {
-									next();
-								}, (err) => {
-									generatorObject.throw(error);
-								});
-							}
-						}
-						remoteLogger(function* logMessages() {
+						remote(function* logMessages() {
 							try {
-								yield 'Message 1';
-								yield 'Message 2';
-								yield 'Message 3';
-							} catch(err) {
-								console.error(err);
-							}
+								let msg = 'Message 1';
+								msg = yield msg;
+								//...
+								msg = yield msg;
+							} catch(err) { console.error(err); }
 						});
 						```
+					</script>
+				</section>
+				<section data-markdown class="md-code-large">
+					<script type="text/template">
+						#### generator
+						Using co
+						```js
+						const co = require('co');
+
+						co(function *(){
+							let markdown = yield fs.readFile('README.md');
+							let htmlContent = html.fromMarkdownSync(markdown);
+							...
+						}).catch(onerror);
+						```
+						Note:
+						- co
 					</script>
 				</section>
 				<section>
