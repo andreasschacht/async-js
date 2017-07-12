@@ -74,19 +74,15 @@
 						#### Sync
 
 						```js
-						const fs = require('fs');
-						const html = require('./html');
-
-						function mdToHtml(file) {
-							let markdown = fs.readFileSync(file);
-							let htmlContent = html.fromMarkdownSync(markdown);
-							fs.writeFileSync(`${file}.html`, htmlContent);
+						function doSomething() {
+							let data = foo();
+							data = bar(data);
+							return baz(data);
 						}
 
-						mdToHtml('./README.md');
-						console.log('done');
+						let result = doSomething();
+						console.log(result);
 						```
-						Add error handling
 						Note:
 						- very common use case
 						- process depends on result of previous one
@@ -97,22 +93,20 @@
 						#### Sync
 
 						```js
-						const fs = require('fs');
-						const html = require('./html');
-
-						function mdToHtml(file) {
-							let markdown = fs.readFileSync(file);
-							let htmlContent = html.fromMarkdownSync(markdown);
-							fs.writeFileSync(`${file}.html`, htmlContent);
+						function doSomething() {
+							let data = foo();
+							data = bar(data);
+							return baz(data);
 						}
 
 						try {
-							mdToHtml('./README.md');
-							console.log('done');
+							let result = doSomething();
+							console.log(result);
 						} catch(err) {
 							console.error(err);
 						}
 						```
+						- handle errors
 					</script>
 				</section>
 				<section>
@@ -130,18 +124,42 @@
 				<section data-markdown>
 					<script type="text/template">
 						#### Callbacks
+						```js
+						function bar(value) {
+							console.log(value);
+						}
+
+						function foo(cb) {
+							setTimeout(function() {
+								cb(2);
+							}, 1000);
+						}
+
+						foo(bar);
+						console.log(1);
+
+						//-> 1
+						//-> 2
+						```
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						#### Callbacks
 
 						```js
 						const fs = require('fs');
 
 						fs.readFile('./README.md', (err, data) => {
-							// executes after data is available
+							// do some work here
 						});
 						```
 						- "error-first"- / "errback"-convention
 						- err is null on success
 
 						Note:
+						- respect error handling
+						- avoid forget/skip err
 						- signature is just a convention
 					</script>
 				</section>
@@ -191,24 +209,18 @@
 						#### Callbacks
 
 						```js
-						const fs = require('fs');
-						const html = require('./html');
-
-						function mdToHtml(file, cb) {
-							fs.readFile(file, (err, markdown) => {
-								html.fromMarkdownCb(markdown, (err, htmlContent) => {
-									fs.writeFile(`${file}.html`, htmlContent, (err) => {
-										cb(null);
-									});
+						function doSomething(cb) {
+							foo((err, data) => {
+								bar(data, (err, data) => {
+									baz(data, cb);
 								});
 							});
 						}
 
-						mdToHtml('./README.md', (err) => {
-							console.log('done');
+						doSomething((err, data) => {
+							console.log(data);
 						});
 						```
-						- error handling
 						Note:
 						- harder to read
 						- indentation
@@ -222,46 +234,40 @@
 						#### Callbacks
 
 						```js
-						const fs = require('fs');
-						const html = require('./html');
-
-						function mdToHtml(file, cb) {
-							fs.readFile(file, (err, markdown) => {
+						function doSomething(cb) {
+							foo((err, data) => {
 								if (err) {
 									cb(err);
 								} else {
-									html.fromMarkdownCb(markdown, (err, htmlContent) => {
+									bar(data, (err, data) => {
 										if (err) {
 											cb(err);
 										} else {
-											fs.writeFile(`${file}.html`, htmlContent, (err) => {
-											    if (err) {
-											        cb(err);
-											    } else {
-											        cb(null);
-											    }
-											});
+											baz(data, cb);
 										}
 									});
 								}
 							});
 						}
 
-						mdToHtml('./README.md', (err) => {
+						doSomething((err, data) => {
 							if (err) {
 								console.error(err);
 							} else {
-								console.log('done');
+								console.log(data);
 							}
 						});
 						```
+						- error handling
 						Note:
 						- very hard to read
-						- indentation, shallowed
+						- indentation, high nested level
 						- callback hell
 						- shape of pyramid
 						- known as pyramid of doom
 						- exit as soon as possible
+						- skip else block
+						- skip further execution
 					</script>
 				</section>
 				<section data-markdown class="md-small md-code-large">
@@ -269,164 +275,331 @@
 						#### Callbacks
 
 						```js
-						const fs = require('fs');
-						const html = require('./html');
-
-						function mdToHtml(file, cb) {
-							fs.readFile(file, (err, markdown) => {
+						function doSomething(cb) {
+							foo((err, data) => {
 								if (err) {
 									return cb(err);
 								}
-								html.fromMarkdownCb(markdown, (err, htmlContent) => {
+								bar(data, (err, data) => {
 									if (err) {
 										return cb(err);
 									}
-									fs.writeFile(`${file}.html`, htmlContent, (err) => {
-										if (err) {
-											return cb(err);
-										}
-										cb(null);
-									});
+									baz(data, cb);
 								});
 							});
 						}
 
-						mdToHtml('./README.md', (err) => {
+						doSomething((err, data) => {
 							if (err) {
 								return console.error(err);
 							}
-							console.log('done');
+							console.log(data);
 						});
 						```
 						- exit as soon as possible
 						Note:
 						- skip else block
 						- skip further execution
-						- use named function
-							- stack trace
+						- compare to sync example
 					</script>
 				</section>
 				<section data-markdown class="md-small md-code-large">
 					<script type="text/template">
-						## Callbacks
-
+						#### Callbacks vs Sync
 						```js
-						const fs = require('fs');
-						const html = require('./html');
-
-						function mdToHtml(file, cb) {
-							fs.readFile(file, (err, markdown) => {
+						function doSomething(cb) {
+							foo((err, data) => {
 								if (err) {
 									return cb(err);
 								}
-								htmlFromMd(markdown, file, cb);
+								bar(data, (err, data) => {
+									if (err) {
+										return cb(err);
+									}
+									baz(data, cb);
+								});
 							});
 						}
 
-						function htmlFromMd(markdown, file, cb) {
-							html.fromMarkdownCb(markdown, (err, htmlContent) => {
-							if (err) {
-								return cb(err);
-							}
-							writeFile(htmlContent, file, cb);
-						}
-
-						function writeFile(htmlContent, file, cb) {
-							fs.writeFile(`${file}.html`, htmlContent, (err) => {
-								if (err) {
-									return cb(err);
-								}
-								cb(null);
-							});
-						}
-
-						mdToHtml('./README.md', (err) => {
+						doSomething((err, data) => {
 							if (err) {
 								return console.error(err);
 							}
-							console.log('done');
+							console.log(data);
 						});
 						```
-						Note:
-						- better indentation
-						- more shallowed
-						- advantage
-						  - first approach
-							- can consume less memory
-							- can faster
-						- drawback, disadvantage
-							- no chaining
-							- nested level
-						- compare
-							- not really intuitive like first
-							- far away from first example
-					</script>
-				</section>
-				<section data-markdown>
-					<script type="text/template">
-						#### Sync
-
 						```js
-						const fs = require('fs');
-						const html = require('./html');
-
-						function mdToHtml(file) {
-							let markdown = fs.readFileSync(file);
-							let htmlContent = html.fromMarkdownSync(markdown);
-							fs.writeFileSync(`${file}.html`, htmlContent);
+						function doSomething() {
+							let data = foo();
+							data = bar(data);
+							return baz(data);
 						}
 
 						try {
-							mdToHtml('./README.md');
-							console.log('done');
+							let result = doSomething();
+							console.log(result);
 						} catch(err) {
 							console.error(err);
 						}
 						```
 						Note:
-						- compare
+						- high indentation level
+						- lost readability
+							- not really intuitive like first
+						- many blocks
+						- far away from first example
 					</script>
 				</section>
 				<section data-markdown>
 					<script type="text/template">
 						## Promises
-						- objects represents an eventual result
-						- primary interacting through its `then` method
-						- states
-							- pending
-							- fullfilled
-							- rejected
-							- settled = fullfilled || rejected
+						- objects represents an eventual result/failure
 
+						```js
+						new Promise(function(resolve, reject) { ... } );
+						```
+						<div class="fragment fade-in">
+						- states
+						<pre>pending := !fulfilled && !rejected</pre>
+						<pre>fulfilled</pre>
+						<pre>rejected</pre>
+						</div>
 						Note:
-							- go more in detail later?
+						- became 1st class citizen of modern frameworks
+						- avoid basics
+						- focus on traps/edge cases
+						- pass executor function
+						- pending is initial state
+						- settled := !pending <=> fulfilled || rejected
+						- resolved := fulfilled || rejected || follow thenable/promise
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Promises
+						```js
+							new Promise((resolve, reject) => {
+								// executes immediatly
+								// do some work
+								// pending state
+								if (foo) {
+									resolve(foo);
+									// fulfilled state
+								} else {
+									reject(reason);
+									// rejected state
+								}
+							});
+						```
+						Note:
+							- work should be async
 					</script>
 				</section>
 				<section data-markdown>
 					<script type="text/template">
 						#### Promises
+						```js
+						Promise.reject('reason');
+						// state rejected
+
+						Promise.resolve('value');
+						// state fulfilled
+
+						Promise.resolve(Promise.reject('reason'));
+						// return passed Promise, state rejected
+						```
+						Note:
+						- if pass a promise, resolve returns that promise
+					</script>
+					</section>
+					<section data-markdown>
+					<script type="text/template">
+						#### Promises
+						```js
+						Promise.all([
+							Promise.resolve('val1'),
+							Promise.resolve('val2')
+						]); // resolves async, state pending, will fulfill
+
+						Promise.all([]); // resolves sync, state fulfilled
+
+						Promise.all([
+							'val1',
+							'val2'
+						]); // resolves async (sync on Chrome 58), state pending (fulfilled), will fulfill
+
+						Promise.all([
+							Promise.resolve('value'),
+							Promise.reject('reason')
+						]); // resolves sync, state rejected
+						```
+						Note:
+						- Promise.all(iterable); Array/String
+						- all is fulfilled, if all promises are fulfilled
+						- all is rejected, if at least one promise is rejected
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						#### Promises
+						```js
+						Promise.race([
+							Promise.resolve('val1'),
+							Promise.reject('val2')
+						]); // state pending, will fulfill with value: 'val1'
+
+						Promise.race([
+							Promise.reject('val2'),
+							Promise.resolve('val1')
+						]); // state pending, will reject with reason: 'val2'
+
+						Promise.race([]); // will pending forever
+						```
+						Note:
+						- Promise.race(iterable); Array/String
+						- race follows the first settled
+						- race pending foreverfollows the first settled
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Promises
 
 						```js
-						let promise = new Promise((resolve, reject) => {
-							// do something
-							// on success
-							resolve(value);
-							// on failure
-							reject(reason);
+						Promise.prototype.then(onFulfilled[, onRejected]);
+
+						Promise.resolve('value').then((data) => {
+							console.log(data);
+						});
+
+						Promise.reject('reason').then((data) => {},
+						(reason) => {
+								console.error(reason);
+						});
+
+						Promise.prototype.catch(onRejected);
+
+						Promise.reject('reason').catch((reason) => {
+							console.error(reason);
+						});
+						```
+						Note:
+						- provides then/catch
+						- catch is the same as then(null, onRejected)
+						- returns a promise, so it's chainable
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Promises
+						```js
+						let promise = Promise.reject(Error('test'));
+
+						 // -> Uncaught (in promise) Error: test
+						```
+						Note:
+						- keep in mind, then/catch returns a promise
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Promises
+						```js
+						let promise = Promise.reject(Error('test'));
+						promise.catch((error) => {
+							// handle error
+						});
+
+						 // -> No output
+						```
+						Note:
+						- keep in mind, then/catch returns a promise
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Promises
+						```js
+						let promise = Promise.reject(Error('test'));
+						promise.catch((error) => {
+							// handle error
 						});
 
 						promise.then((value) => {
-							// on fulfillment
-						}, (reason) => {
-							// on rejection
+							// will never executed
 						});
+						 // -> Uncaught (in promise) Error: test
 						```
-
 						Note:
-						- constructor takes a callback
-						- passed 2 functions into the callback
-						- takes 2 arguments: onFulfill/onReject(fulfill/reject)
-						- then returns a promise
+						- keep in mind, then/catch returns a promise
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Promises
+						```js
+						let promise = Promise.reject(Error('test'));
+						promise.catch((error) => {
+							// handle error
+						});
+
+						promise.then((value) => {
+							// will never executed
+						}, (err) => {});
+
+						promise.then((value) => {
+							// will never executed
+						}).catch((err) => {});
+						// -> No output
+						```
+						Note:
+						- keep in mind, then/catch returns a promise
+						- chain multiple methods on same promise
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Promises
+						```js
+						let promise = Promise.resolve({ name: 'Andreas'});
+						promise.then((value) => {
+							console.log('1: '+value.name);
+							value.name = 'Andi';
+							return value;
+						}).then((value) => {
+							console.log('2: '+value.name);
+						});
+						// -> 1: Andreas
+						// -> 2: Andi
+						```
+						Note:
+						- chain multiple methods on same promise
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						## Promises
+						```js
+						let promise = Promise.resolve({ name: 'Andreas'});
+						promise.then((value) => {
+							console.log('1: '+value.name);
+							value.name = 'Andi';
+							return value;
+						}).then((value) => {
+							console.log('2: '+value.name);
+						});
+						// ....
+						promise.then((value) => {
+							console.log('1.5: '+value.name);
+							value.name = 'Andy';
+						});
+						// -> 1: Andreas
+						// -> 1.5: Andi
+						// -> 2: Andy
+						```
+						Note:
+						- idea
+						- chain multiple methods on same promise
 					</script>
 				</section>
 				<section data-markdown>
@@ -435,37 +608,16 @@
 						#### chainable
 
 						```js
-						promise.then((data) => {
-							return new Promise(...);
+						Promise.resolve().then((data) => {
+							return Promise.resolve('data');
 						}).then((data) => {
+							console.log(data); // -> 'data'
 							return 42;
-						}).then((data) => {
-							throw new Error('message');
-						}).then((data) => {
-							// this will never been reached
 						}).then(undefined, (error) => {
-							// handle error;
-						});
-
-						```
-						Note:
-						- return promisses
-						- return concrete values
-						- throw error
-					</script>
-				</section>
-				<section data-markdown>
-					<script type="text/template">
-						## Promises
-						#### chainable
-
-						```js
-						promise.then((data) => {
-							return new Promise(...);
+							// this will never been reached
 						}).then((data) => {
-							return 42;
-						}).then((data) => {
-							throw new Error('message');
+							console.log(data); // -> 42
+							throw Error('message');
 						}).then((data) => {
 							// this will never been reached
 						}).catch((error) => {
@@ -474,25 +626,26 @@
 
 						```
 						Note:
-						- the magic is in the then method
+						- chainable through then function
+						- value will pass through the chain to the next handler, if undefined (or not a function)
 					</script>
 				</section>
 				<section data-markdown>
 					<script type="text/template">
 						## Promises
-						...swallow errors.
-
-						Do they really?
+						...swallow errors?
 
 						```js
-						let promise = promise.then((data) => {
-							throw new Error('message');
+						let promise = Promise.resolve().then((data) => {
+							throw Error('message');
 						});
 						// ...some more code
 
 						```
-						...what happens now?
+						What happens now?
 						Note:
+						- theoretical to me
+						- try to reproduce, never managed
 						- not popped up, immediatly
 						- promise is in rejected state
 						- there are 2 options
@@ -504,34 +657,32 @@
 						You can chain the catch later
 
 						```js
-						let promise = promise.then((data) => {
+						let promise = Promise.resolve().then((data) => {
 							throw new Error('message');
 						});
 						//
-						// ...in another (maybe async) part of code
+						// ...in another part of code
 						//
 						promise.catch((error) => {
 							console.error(error);
 						});
 						```
 						Note:
+							- add catch to the chain
 							- As long as the promise live
-							- accessable
-							- add something to the chain
+							- promise is accessable
 					</script>
 				</section>
 				<section data-markdown>
 					<script type="text/template">
 						## Promises
-						don't really swallow errors...
-
 						```js
-						let promise = promise.then((data) => {
+						let promise = Promise.resolve().then((data) => {
 							throw new Error('message');
 						});
 						//
-						// ...promise is settled and not referenced anymore...
-						// ...the error will popup on garbage-collection
+						// ..if promise is settled and out of scope...
+						// ..the error will popup on garbage-collection
 						```
 						Note:
 							- hard to say when
@@ -556,6 +707,7 @@
 
 						```
 						Note:
+						- tired of callbacks
 						- from previous explaination
 					</script>
 				</section>
@@ -588,83 +740,80 @@
 				<section data-markdown>
 					<script type="text/template">
 						#### Promises
-
 						```js
-						const fsp = require('fs-promise');
-						const html = require('./html');
-
-						function mdToHtml(file) {
-							return fsp.readFile(file)
-							.then((markdown) => {
-								return html.fromMarkdownProm(markdown);
-							}).then((htmlContent) => {
-								return fsp.writeFile(`${file}.html`, htmlContent);
-							});
+						function doSomething() {
+							return Promise.resolve(foo())
+								.then((data) => {
+									return bar(data);
+								})
+								.then((data) => {
+									return baz(data);
+								});
 						}
 
-						mdToHtml('./README.md').then(() => {
-							console.log('done');
+						doSomething().then((data) => {
+							console.log(data);
 						}).catch((error) => {
 							console.error(error);
 						});
-
 						```
 						Note:
-						- fs ops also available as promises
+						- short syntax
 					</script>
 				</section>
 				<section data-markdown>
 					<script type="text/template">
 						#### Promises
-
 						```js
-						const fsp = require('fs-promise');
-						const html = require('./html');
-
-						function mdToHtml(file) {
-							return fsp.readFile(file)
-							.then(html.fromMarkdownProm)
-							.then((htmlContent) => {
-								return fsp.writeFile(`${file}.html`, htmlContent);
-							});
+						function doSomething() {
+							return Promise.resolve(foo())
+								.then(bar)
+								.then(baz);
 						}
 
-						mdToHtml('./README.md').then(() => {
-							console.log('done');
-						}).catch((error) => {
+						doSomething().then((data) => {
+							console.log(data);
+						}).catch((error) =>
 							console.error(error);
 						});
-
 						```
 						Note:
-						- a little bit shorter
-						- comparison
+						- short syntax
 					</script>
 				</section>
-				<section data-markdown>
+				<section data-markdown class="md-small md-code-large">
 					<script type="text/template">
-						#### Sync
-
+						#### Promises vs Sync
 						```js
-						const fs = require('fs');
-						const html = require('./html');
+						function doSomething() {
+							return Promise.resolve(foo())
+								.then(bar)
+								.then(baz);
+						}
 
-						function mdToHtml(file) {
-							let markdown = fs.readFileSync(file);
-							let htmlContent = html.fromMarkdownSync(markdown);
-							fs.writeFileSync(`${file}.html`, htmlContent);
+						doSomething().then((data) => {
+							console.log(data);
+						}).catch((error) =>
+							console.error(error);
+						});
+						```
+						```js
+						function doSomething() {
+							let data = foo();
+							data = bar(data);
+							return baz(data);
 						}
 
 						try {
-							mdToHtml('./README.md');
-							console.log('done');
+							let result = doSomething();
+							console.log(result);
 						} catch(err) {
 							console.error(err);
 						}
 						```
 						Note:
-							- good, but not satisfied
-							- have another bullet
+						- good, but not satisfied
+						- have another bullet
 					</script>
 				</section>
 				<section data-markdown>
@@ -681,31 +830,29 @@
 					<script type="text/template">
 						#### async / await
 						```js
-						const fsp = require('fs-promise');
-
-						async function(file) {
-							let markdown = await fsp.readFile(file);
+						async function() {
+							let value = await Promise.resolve('value');
+							await Promise.reject(Error('reason'));
 							...
 						}
 						```
 						Note:
 						- what happens
-							- onFulfill: assign markdown with the resolved value
-							- onRejection: throw an error
+							- onFulfill: await returns the resolved value
+							- onRejection: await throws an error
+								- promise returned by async rejects
 					</script>
 				</section>
 				<section data-markdown>
 					<script type="text/template">
 						#### async / await
 						```js
-						const fsp = require('fs-promise');
-
 						async function(file) {
 							try {
-								let markdown = await fsp.readFile(file);
-								let somevalue = await (() => { return 42; })();
+								let value = await Promise.resolve('value');
+								await Promise.reject(Error('reason'));
 								// do something
-								return markdown;
+								return 'result'; // never reached
 							} catch(error) {
 								// handle error
 								// return fallbackValue;
@@ -722,45 +869,30 @@
 				</section>
 				<section data-markdown>
 					<script type="text/template">
-						#### async / await
-
+						#### async/await vs Sync
 						```js
-						const fsp = require('fs-promise');
-						const html = require('./html');
-
-						async function mdToHtml(file) {
-							let markdown = await fsp.readFile(file);
-							let htmlContent = await html.fromMarkdownProm(markdown);
-							await fsp.writeFile(`${file}.html`, htmlContent);
+						async function doSomething() {
+							let data = await foo();
+							data = await bar(data);
+							return await baz(data);
 						}
 
-						mdToHtml('./README.md').then(() => {
-							console.log('done');
-						}).catch((error) => {
+						doSomething().then((data) => {
+							console.log(data);
+						}).catch((error) =>
 							console.error(error);
 						});
 						```
-						Note:
-						- compare to sync
-					</script>
-				</section>
-				<section data-markdown>
-					<script type="text/template">
-						#### Sync
-
 						```js
-						const fs = require('fs');
-						const html = require('./html');
-
-						function mdToHtml(file) {
-							let markdown = fs.readFileSync(file);
-							let htmlContent = html.fromMarkdownSync(markdown);
-							fs.writeFileSync(`${file}.html`, htmlContent);
+						function doSomething() {
+							let data = foo();
+							data = bar(data);
+							return baz(data);
 						}
 
 						try {
-							mdToHtml('./README.md');
-							console.log('done');
+							let result = doSomething();
+							console.log(result);
 						} catch(err) {
 							console.error(err);
 						}
