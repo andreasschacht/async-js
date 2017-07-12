@@ -54,9 +54,36 @@
 						</dl>
 					</div>
 					<aside class="notes">
-						Oh hey, these are some notes. They'll be hidden in your presentation, but you can see them if you open the
-						speaker notes window (hit 's' on your keyboard).
+						- Async exec code doesn't mean in the background
 					</aside>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						#### Excursion: Event Loop
+						- Async executed code also blocks UI
+
+						- Talk from Philip Roberts @JSConf EU 2014:
+
+						[What the heck is the event loop anyway?](https://www.youtube.com/watch?v=8aGhZQkoFbQ)
+
+
+
+						Note:
+						- very common use case
+						- process depends on result of previous one
+					</script>
+				</section>
+				<section data-markdown>
+					<script type="text/template">
+						#### Excursion: Event Loop
+						![alt stack](/img/stack.png "stack and event queue")
+
+
+
+						Note:
+						- very common use case
+						- process depends on result of previous one
+					</script>
 				</section>
 				<section data-markdown>
 					<script type="text/template">
@@ -86,6 +113,8 @@
 						Note:
 						- very common use case
 						- process depends on result of previous one
+						- concurrently running tasks
+						- race conditions, semaphores, locks
 					</script>
 				</section>
 				<section data-markdown>
@@ -570,7 +599,7 @@
 							console.log('2: '+value.name);
 						});
 						// -> 1: Andreas
-						// -> 2: Andi
+						// -> 2: Andy
 						```
 						Note:
 						- chain multiple methods on same promise
