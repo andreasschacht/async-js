@@ -160,8 +160,9 @@
 
 						function foo(cb) {
 							setTimeout(function() {
+								// do some work
 								cb(2);
-							}, 1000);
+							}, 0);
 						}
 
 						foo(bar);
@@ -659,65 +660,7 @@
 						- value will pass through the chain to the next handler, if undefined (or not a function)
 					</script>
 				</section>
-				<section data-markdown>
-					<script type="text/template">
-						## Promises
-						...swallow errors?
-
-						```js
-						let promise = Promise.resolve().then((data) => {
-							throw Error('message');
-						});
-						// ...some more code
-
-						```
-						What happens now?
-						Note:
-						- theoretical to me
-						- try to reproduce, never managed
-						- not popped up, immediatly
-						- promise is in rejected state
-						- there are 2 options
-					</script>
-				</section>
-				<section data-markdown>
-					<script type="text/template">
-						## Promises
-						You can chain the catch later
-
-						```js
-						let promise = Promise.resolve().then((data) => {
-							throw new Error('message');
-						});
-						//
-						// ...in another part of code
-						//
-						promise.catch((error) => {
-							console.error(error);
-						});
-						```
-						Note:
-							- add catch to the chain
-							- As long as the promise live
-							- promise is accessable
-					</script>
-				</section>
-				<section data-markdown>
-					<script type="text/template">
-						## Promises
-						```js
-						let promise = Promise.resolve().then((data) => {
-							throw new Error('message');
-						});
-						//
-						// ..if promise is settled and out of scope...
-						// ..the error will popup on garbage-collection
-						```
-						Note:
-							- hard to say when
-							- don't forget to catch
-					</script>
-				</section>
+<!--
 				<section data-markdown>
 					<script type="text/template">
 						## Promises
@@ -766,6 +709,7 @@
 						```
 					</script>
 				</section>
+	-->
 				<section data-markdown>
 					<script type="text/template">
 						#### Promises
@@ -795,14 +739,15 @@
 						#### Promises
 						```js
 						function doSomething() {
-							return Promise.resolve(foo())
+							return Promise.resolve()
+								.then(foo)
 								.then(bar)
 								.then(baz);
 						}
 
 						doSomething().then((data) => {
 							console.log(data);
-						}).catch((error) =>
+						}).catch((error) => {
 							console.error(error);
 						});
 						```
@@ -810,12 +755,13 @@
 						- short syntax
 					</script>
 				</section>
-				<section data-markdown class="md-small md-code-large">
+				<section data-markdown class="md-code-large">
 					<script type="text/template">
 						#### Promises vs Sync
 						```js
 						function doSomething() {
-							return Promise.resolve(foo())
+							return Promise.resolve()
+								.then(foo)
 								.then(bar)
 								.then(baz);
 						}
@@ -849,21 +795,28 @@
 					<script type="text/template">
 						#### async / await
 						- RC ES7
-						- `async function`
-							- will return a Promise
-						- `await` keyword
-							- suspending execution in context
+						- `async function`-declaration
+							- defines an asynchronous function
+							- async function call returns a promise
+						- `await` operator
+							- can only be used in async functions
+							- suspending execution
+							- until following expression is resolved
 					</script>
 				</section>
 				<section data-markdown>
 					<script type="text/template">
 						#### async / await
 						```js
-						async function() {
-							let value = await Promise.resolve('value');
+						async function foo() {
+							return 'value';
+							return Promise.resolve('value');
+
+							return Promise.reject(Error('reason'));
+							throw Error('reason');
 							await Promise.reject(Error('reason'));
-							...
 						}
+						let fooPromise = foo();
 						```
 						Note:
 						- what happens
@@ -876,12 +829,12 @@
 					<script type="text/template">
 						#### async / await
 						```js
-						async function(file) {
+						async function foo() {
 							try {
 								let value = await Promise.resolve('value');
 								await Promise.reject(Error('reason'));
-								// do something
-								return 'result'; // never reached
+								// never reached
+								return value;
 							} catch(error) {
 								// handle error
 								// return fallbackValue;
@@ -956,245 +909,251 @@
 				</section>
 				<section data-markdown class="md-code-large">
 					<script type="text/template">
-						#### generator
-						- pass argument to generator function
-						- generator object saves it's state while suspending
+						#### generator function
+						- declaration: function keyword followed by an asterisk
 
 						```js
+						function* genFunc([param[, ... param]]) { statements }
 
-						function* generatorFunction(startval) {
-							let current = startval;
-							while(current > 0) {
+						let genObj = genFunc();
+						```
+						Note:
+						- The function* declaration
+						- (function keyword followed by an asterisk)
+						- defines a generator function
+						- generator function
+						- generator object
+					</script>
+				</section>
+				<section data-markdown class="md-code-large">
+					<script type="text/template">
+						#### generator object
+						```js
+						Generator.prototype.next()
+
+						Generator.prototype.return()
+
+						Generator.prototype.throw()
+						```
+						Note:
+						- Returns a value yielded by the yield expression.
+						- Returns the given value and finishes the generator.
+						- Throws an error to a generator.
+					</script>
+				</section>
+				<section data-markdown class="md-code-large">
+					<script type="text/template">
+						#### generators
+						- next()
+
+						```js
+						function* fibonacci() {
+							let current = 0;
+							let next = 1;
+							while (true) {
 								yield current;
-								current--;
+								[current, next] = [next, current + next];
 							}
 						}
 
-						let generatorObject = generatorFunction(3);
-
-						console.log(generatorObject.next());
-
-						for (let number of generatorObject ) {
-							console.log(number);
-						}
-
-						console.log(generatorObject.next());
-						// { done: false, value: 3}, 2,  1, { done: true }
+						let sequence = fibonacci();
+						console.log(sequence.next());     // { done: false, value: 0}
+						console.log(sequence.next().value);     // 1
+						console.log(sequence.next().value);     // 1
+						console.log(sequence.next().value); 		// 2
 						```
 						Note:
-							- iterable: g[Symbol.iterator] === function
-							- iterable: g[Symbol.iterator]: () => ({ next() { return { done: true, value: 1 }})
-							- iterable: @@iterator
-							- iterator: g.next === function
-							- suspend / resume
+						- generator function
+						- generator object
+						- pass arg to next
+						- yield suspend / next resumes
 					</script>
 				</section>
 				<section data-markdown class="md-code-large">
 					<script type="text/template">
-						#### generator
-						- pass value to yield
+						#### generators
+						- next()
 
 						```js
-						function* generatorFunction(startval) {
-							let current = startval;
-							while(current > 0) {
-								let restart = yield current;
-								if (restart) {
-									current = startval;
-								else {
-									current--;
+						function* fibonacci() {
+							let reset = true, current, next;
+							while (true) {
+								if (reset){
+									current = 0;
+									next = 1;
 								}
+								reset = yield current;
+								[current, next] = [next, current + next];
 							}
 						}
 
-						let generatorObject = generatorFunction(3);
-
-						//will throw an error
-						//console.log(generatorObject.next(true));
-
-						console.log(generatorObject.next().value);
-						console.log(generatorObject.next(true).value);
-						console.log(generatorObject.next().value);
-						// 3, 2, 3
+						let sequence = fibonacci();
+						console.log(sequence.next());     // { done: false, value: 0}
+						console.log(sequence.next().value);     // 1
+						console.log(sequence.next().value);     // 1
+						console.log(sequence.next(true).value); // 0
 						```
 						Note:
-						- iterable: g[Symbol.iterator] === function
-						- iterable: g[Symbol.iterator]: () => ({ next() { return { done: true, value: 1 }})
-						- iterable: @@iterator
-						- iterator: g.next === function
+						- generator function
+						- generator object
+						- pass arg to next
+						- suspend / resume
 					</script>
 				</section>
 				<section data-markdown class="md-code-large">
 					<script type="text/template">
 						#### generator
-						- IoC
+						- return()
 
 						```js
-						function* generatorFunction() {
-							yield false;
-							yield true;
-							yield false;
+						function* gen() {
+							yield 1;
+							yield 2;
+							yield 3;
 						}
 
-						let generatorObject = generatorFunction();
-						let startval = 3;
-						let currentval = startval;
-						while(true) {
-							let reset = generatorObject.next();
-							console.log(currentval);
-							if (reset.value) {
-								currentval = startval;
-							} else {
-								currentval--;
-							}
-							if (reset.done || currentval < 1) {
-								break;
-							}
-						}
-						// will output 3, 2, 3
+						var g = gen();
+						g.next();        // { value: 1, done: false }
+						g.return();      // { value: undefined, done: true }
+						g.return('foo'); // { value: "foo", done: true }
+						g.next();        // { value: undefined, done: true }
 						```
 						Note:
-						- iterable: g[Symbol.iterator] === function
-						- iterable: g[Symbol.iterator]: () => ({ next() { return { done: true, value: 1 }})
-						- iterable: @@iterator
-						- iterator: g.next === function
+						- return returns the passed value and finished genObj
 					</script>
 				</section>
 				<section data-markdown class="md-code-large">
 					<script type="text/template">
 						#### generator
-						- IoC
+						- throw()
 
 						```js
-						function* generatorFunction() {
-							yield false;
-							yield true;
-							yield false;
-						}
-
-						function printCount(genFunc, startval) {
-							let generatorObject = genFunc();
-							let currentval = startval;
+						function* gen() {
 							while(true) {
-								let reset = generatorObject.next();
-								console.log(currentval);
-								if (reset.value) {
-									currentval = startval;
-								} else {
-									currentval--;
-								}
-								if (reset.done || currentval < 1) {
-									break;
+								try {
+									 yield 42;
+								} catch(e) {
+									console.log('Error caught!');
 								}
 							}
 						}
 
-						printCount(generatorFunction, 3);
-						//  3, 2 3
-
+						var g = gen();
+						g.next();
+						// { value: 42, done: false }
+						g.throw(new Error('Something went wrong'));
+						// "Error caught!"
+						// { value: 42, done: false }
 						```
+						Note:
+						- throw() method resumes the execution by throwing an error into it
+						- return object with value
+						- IOT
 					</script>
 				</section>
 				<section data-markdown class="md-code-large">
 					<script type="text/template">
-						#### generator
-						- IoC
-
+						#### async generator
 						```js
-						function* logMessages() {
-							yield 'Message 1';
-							yield 'Message 2';
-							yield 'Message 3';
-						}
+						let runGenerator = function(generatorFunction) {
+							// recursive next()
+							let next = function (arg) {
+								let result = it.next(arg);
+								// are we done?
+								if (result.done) return;
 
-						function remoteLogger(genFunc) {
-							let generatorObject = genFunc();
-							getNext();
-
-							function getNext() {
-								let message = generatorObject.next();
-								if (message.done) {
-									return;
+								if (typeof result.value == 'function') {
+									result.value(next);
 								}
-								remoteLog(message.value, getNext);
-							},
-
-							function remoteLog(value, next) {
-								ajax.post('https://my-remote-log.com', { value })
-								.then(() => {
-									next();
-								});
-							}
-						}
-						remoteLogger(logMessages);
-						```
-					</script>
-				</section>
-				<section data-markdown class="md-code-large">
-					<script type="text/template">
-						#### generator
-
-						```js
-						function remoteLogger(genFunc) {
-							let generatorObject = genFunc();
-							getNext();
-
-							function getNext() {
-								let message = generatorObject.next();
-								if (message.done) {
-									return;
+								else {
+									// if the response isn't a function, pass it to next()
+									next(result.value);
 								}
-								remoteLog(message.value, getNext);
-							},
-							function remoteLog(value, next) {
-								ajax.post('https://my-remote-log.com', { value })
-								.then(() => {
-									next();
-								});
 							}
+							// create the iterator
+							let it = generatorFunction();
+							return next();
 						}
-						remoteLogger(function* logMessages() {
-							yield 'Message 1';
-							yield 'Message 2';
-							yield 'Message 3';
+
+						// initiliase and pass in a generator function
+						runGenerator(function* () {
+							let val = yield fetch(url);
+							let val2 = yield fetch(url2);
 						});
 						```
+						Note:
+						  - call runGenerator, pass GenFunc
+						  - runGenerator defines a recursive called function next
+						  - creates a genObj
+							- next called itself until genObj is done
+						  - resolve Promises gets from genObj, pass result to genObj
+							- simplified example
+							- libs like coroutine
+							- why we shouldn't use async await?
 					</script>
 				</section>
 				<section data-markdown class="md-code-large">
 					<script type="text/template">
-						#### generator
-
+						#### ember-concurrency
 						```js
-						function remoteLogger(genFunc) {
-							let generatorObject = genFunc();
-							getNext();
-							function getNext() {
-								let message = generatorObject.next();
-								if (message.done) {
-									return;
+						export default Ember.Component.extend({
+							result: null,
+							actions: {
+								async getProducts() {
+									let products = await this.get('store').get('products');
+									this.set('result', products);
 								}
-								remoteLog(message.value, getNext);
 							},
-							function remoteLog(value, next) {
-								ajax.post('https://my-remote-log.com', { value })
-								.then(() => {
-									next();
-								}, (err) => {
-									generatorObject.throw(error);
-								});
-							}
-						}
-						remoteLogger(function* logMessages() {
-							try {
-								yield 'Message 1';
-								yield 'Message 2';
-								yield 'Message 3';
-							} catch(err) {
-								console.error(err);
-							}
 						});
 						```
+						Note:
+						- Component has a lifecycle
+						- it maybe destroyed
+					</script>
+				</section>
+				<section data-markdown class="md-code-large">
+					<script type="text/template">
+						#### ember-concurrency
+
+						```js
+						export default Ember.Component.extend({
+							result: null,
+							fetching: false,
+							actions: {
+								async getProducts() {
+									if (this.get('fetching')) { return; }
+									this.set('fetching', true);
+									try {
+										let products = await this.get('store').get('products');
+										if (this.get('isDestroyed')) { return; }
+										this.set('result', products);
+									} finally (err) {
+										if (this.get('isDestroyed')) { return; }
+										this.set('fetching', false);
+									}
+								}
+							},
+						});
+
+						```
+					</script>
+				</section>
+				<section data-markdown class="md-code-large">
+					<script type="text/template">
+						#### ember-concurrency
+						```js
+						export default Ember.Component.extend({
+							result: null,
+							getProducts: task(function* () {
+								let products = yield this.get('store').get('products');
+								this.set('result', product);
+							}).drop()
+						});
+						```
+						Note:
+							- No isDetroyed guard anymore, cause it cancel
+							- No fetching guard anymore, cause of modifier
+							- Thanks to IOC of genObs
 					</script>
 				</section>
 				<section>
